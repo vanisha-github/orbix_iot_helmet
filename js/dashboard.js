@@ -1,108 +1,77 @@
 import { signOut } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-auth.js";
 import { auth } from "./firebase.js";
 
-// ---------- LOGOUT ----------
+// ---------- COMMON LOGOUT ----------
 document.getElementById("logoutBtn").addEventListener("click", async () => {
   await signOut(auth);
   window.location.href = "index.html";
 });
 
-// Redirect if not logged in
 auth.onAuthStateChanged(user => {
   if (!user) window.location.href = "index.html";
 });
 
-// ---------- THRESHOLDS ----------
+// ---------- CONFIG ----------
+const TS_API_KEY = "RZEYHG68H19CH7MX";
+const TS_CHANNEL = "3309963";
 const ALCOHOL_LIMIT = 1450;
 const ACCIDENT_LIMIT = 17000;
 
-// ---------- DOM ELEMENTS ----------
-const alertTableBody = document.getElementById("alertTableBody");
-const sessionTableBody = document.getElementById("sessionTableBody");
-
-// ---------- FETCH ALERTS ----------
-async function fetchAlerts() {
+// ---------- FETCH DASHBOARD DATA ----------
+async function updateOverview() {
   try {
-    // Fetch last 20 readings for alcohol and MPU X/Y/Z
-    const [alcoholData, mpuXData, mpuYData, mpuZData] = await Promise.all([
-      fetch("https://api.thingspeak.com/channels/3309963/fields/2.json?api_key=RZEYHG68H19CH7MX&results=20").then(r => r.json()),
-      fetch("https://api.thingspeak.com/channels/3309963/fields/3.json?api_key=RZEYHG68H19CH7MX&results=20").then(r => r.json()),
-      fetch("https://api.thingspeak.com/channels/3309963/fields/4.json?api_key=RZEYHG68H19CH7MX&results=20").then(r => r.json()),
-      fetch("https://api.thingspeak.com/channels/3309963/fields/5.json?api_key=RZEYHG68H19CH7MX&results=20").then(r => r.json())
-    ]);
-
-    alertTableBody.innerHTML = "";
-
-    for (let i = 0; i < alcoholData.feeds.length; i++) {
-      const time = alcoholData.feeds[i].created_at;
-      const alcohol = Number(alcoholData.feeds[i].field2 || 0);
-      const ax = Number(mpuXData.feeds[i]?.field3 || 0);
-      const ay = Number(mpuYData.feeds[i]?.field4 || 0);
-      const az = Number(mpuZData.feeds[i]?.field5 || 0);
-
-      const acc = Math.sqrt(ax*ax + ay*ay + az*az);
-      const localTime = new Date(time).toLocaleString("en-IN", { timeZone: "Asia/Kolkata" });
-
-      // Alcohol Alert
-      if (alcohol > ALCOHOL_LIMIT) {
-        const tr = document.createElement("tr");
-        tr.innerHTML = `<td>${localTime}</td><td>Alcohol</td><td>${alcohol}</td>`;
-        alertTableBody.appendChild(tr);
-      }
-
-      // Accident Alert
-      if (acc > ACCIDENT_LIMIT) {
-        const tr = document.createElement("tr");
-        tr.innerHTML = `<td>${localTime}</td><td>Accident</td><td>${acc.toFixed(2)}</td>`;
-        alertTableBody.appendChild(tr);
-      }
+    const url = `https://api.thingspeak.com/channels/${TS_CHANNEL}/feeds.json?api_key=${TS_API_KEY}&results=2`;
+    const res = await fetch(url);
+    const data = await res.json();
+    const feeds = data.feeds;
+    
+    if (feeds.length === 0) return;
+    
+    const latest = feeds[feeds.length - 1];
+    
+    // Status text & icon
+    const alcVal = Number(latest.field2 || 0);
+    const ax = Number(latest.field3 || 0);
+    const ay = Number(latest.field4 || 0);
+    const az = Number(latest.field5 || 0);
+    const acc = Math.sqrt(ax * ax + ay * ay + az * az);
+    
+    const rsCard = document.getElementById("cardRiderStatus");
+    const rsText = document.getElementById("riderStatusText");
+    const rsIcon = document.getElementById("iconRiderStatus");
+    
+    if (acc > ACCIDENT_LIMIT) {
+      rsCard.className = "glass-card flex flex-col justify-center items-center border-t-8 border-red-500 py-10 animate-pulse";
+      rsText.className = "text-4xl font-bold text-red-600";
+      rsText.innerText = "Accident Detected";
+      rsIcon.className = "w-20 h-20 rounded-full bg-red-100 flex items-center justify-center text-red-500 text-4xl mb-4";
+      rsIcon.innerHTML = `<i class="fa-solid fa-car-burst"></i>`;
+    } else if (alcVal > ALCOHOL_LIMIT) {
+      rsCard.className = "glass-card flex flex-col justify-center items-center border-t-8 border-orange-500 py-10";
+      rsText.className = "text-4xl font-bold text-orange-600";
+      rsText.innerText = "DUI Detected";
+      rsIcon.className = "w-20 h-20 rounded-full bg-orange-100 flex items-center justify-center text-orange-500 text-4xl mb-4";
+      rsIcon.innerHTML = `<i class="fa-solid fa-beer-mug-empty"></i>`;
+    } else {
+      rsCard.className = "glass-card flex flex-col justify-center items-center border-t-8 border-green-500 py-10";
+      rsText.className = "text-4xl font-bold text-green-600";
+      rsText.innerText = "Safe";
+      rsIcon.className = "w-20 h-20 rounded-full bg-green-100 flex items-center justify-center text-green-500 text-4xl mb-4";
+      rsIcon.innerHTML = `<i class="fa-solid fa-shield-halved"></i>`;
     }
 
+    // Connection & Time
+    document.getElementById("connStatusText").innerText = "Online";
+    document.getElementById("cardConnStatus").classList.replace("border-gray-500", "border-blue-500");
+    const syncTime = new Date(latest.created_at).toLocaleString("en-IN", { timeZone: "Asia/Kolkata" });
+    document.getElementById("lastUpdatedText").innerText = syncTime;
+
   } catch (err) {
-    console.error("Error fetching alerts:", err);
+    console.error("Error fetching overview:", err);
+    document.getElementById("connStatusText").innerText = "Offline";
+    document.getElementById("cardConnStatus").classList.replace("border-blue-500", "border-gray-500");
   }
 }
 
-// ---------- FETCH SESSIONS ----------
-async function fetchSessions() {
-  try {
-    const mpuXData = await fetch("https://api.thingspeak.com/channels/3309963/fields/3.json?api_key=RZEYHG68H19CH7MX&results=100").then(r => r.json());
-
-    sessionTableBody.innerHTML = "";
-    let sessions = [];
-    let sessionStart = null;
-    let prevTime = null;
-    const MAX_GAP = 5 * 60 * 1000; // 5 min
-
-    mpuXData.feeds.forEach(feed => {
-      if(feed.field3 !== null){
-        const currentTime = new Date(feed.created_at);
-        if(!sessionStart) sessionStart = currentTime;
-        else if(prevTime && currentTime - prevTime > MAX_GAP){
-          sessions.push({ start: sessionStart, end: prevTime });
-          sessionStart = currentTime;
-        }
-        prevTime = currentTime;
-      }
-    });
-
-    if(sessionStart && prevTime) sessions.push({ start: sessionStart, end: prevTime });
-
-    sessions.forEach(sess => {
-      const durationMin = Math.floor((sess.end - sess.start)/60000);
-      const tr = document.createElement("tr");
-      tr.innerHTML = `<td>${sess.start.toLocaleString()}</td><td>${sess.end.toLocaleString()}</td><td>${durationMin} min</td>`;
-      sessionTableBody.appendChild(tr);
-    });
-
-  } catch (err) {
-    console.error("Error fetching sessions:", err);
-  }
-}
-
-// ---------- AUTO REFRESH ----------
-fetchAlerts();
-setInterval(fetchAlerts, 10000); // every 10 sec
-
-fetchSessions();
-setInterval(fetchSessions, 60000); // every 1 min
+updateOverview();
+setInterval(updateOverview, 10000); // 10s poll

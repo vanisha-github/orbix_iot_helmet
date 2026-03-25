@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Alert Logs | Orbix Helmet</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    body { background-color: #f3f4f6; }
+    .glass-card { background: white; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); padding: 1.5rem; }
+    canvas { width: 100% !important; height: 100% !important; }
+  </style>
+</head>
+<body class="text-gray-800 font-sans antialiased flex flex-col min-h-screen">
+  
+  <header class="bg-indigo-700 shadow-md sticky top-0 z-50 text-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between h-16 items-center flex-wrap">
+        <div class="flex items-center space-x-3 w-full md:w-auto mb-2 md:mb-0">
+          <i class="fa-solid fa-motorcycle text-2xl"></i>
+          <span class="font-bold text-xl tracking-wide">Orbix Helmet</span>
+        </div>
+        <nav class="flex items-center space-x-1 md:space-x-3 text-sm font-medium overflow-x-auto w-full md:w-auto">
+          <a href="dashboard.html" class="hover:bg-indigo-600 border-indigo-700 px-3 py-2 rounded-md transition">Dashboard</a>
+          <a href="alerts.html" class="bg-indigo-800 px-3 py-2 rounded-md transition">Alerts</a>
+          <a href="sensors.html" class="hover:bg-indigo-600 px-3 py-2 rounded-md transition">Sensors</a>
+          <a href="contacts.html" class="hover:bg-indigo-600 px-3 py-2 rounded-md transition">Contacts</a>
+          <a href="system.html" class="hover:bg-indigo-600 px-3 py-2 rounded-md transition">System Info</a>
+          <button id="logoutBtn" class="bg-red-500 hover:bg-red-600 px-3 py-2 rounded-lg transition shadow">
+            <i class="fa-solid fa-arrow-right-from-bracket mr-1"></i> Logout
+          </button>
+        </nav>
+      </div>
+    </div>
+  </header>
+
+  <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full space-y-8">
+    
+    <div class="flex justify-between items-center bg-red-50 border-l-4 border-red-500 p-4 rounded shadow-sm">
+      <div>
+        <h1 class="text-2xl font-bold text-red-700"><i class="fa-solid fa-bell mr-2"></i>Alert Logs & History</h1>
+        <p class="text-red-600 text-sm">Review triggered alerts and historical event graphs.</p>
+      </div>
+      <div class="text-center bg-white px-6 py-2 rounded-lg shadow-sm border border-red-200">
+        <p class="text-xs text-gray-500 uppercase font-bold tracking-widest">Total Alerts</p>
+        <p class="text-3xl font-bold text-red-600" id="totalAlertsText">0</p>
+      </div>
+    </div>
+
+    <!-- Charts -->
+    <div class="glass-card">
+      <h3 class="text-lg font-bold border-b pb-2 mb-4 text-gray-700">
+        <i class="fa-solid fa-chart-line text-indigo-500 mr-2"></i> Event History Graphs
+      </h3>
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div class="h-48 bg-gray-50 rounded border p-2 col-span-1 lg:col-span-2">
+          <canvas id="chartAccData"></canvas>
+        </div>
+        <div class="h-48 bg-gray-50 rounded border p-2">
+          <canvas id="chartAlcData"></canvas>
+        </div>
+        <div class="h-48 bg-gray-50 rounded border p-2">
+          <canvas id="chartLdrData"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Alert Table -->
+    <div class="glass-card">
+      <h3 class="text-lg font-bold border-b pb-2 mb-4 text-gray-700">
+        <i class="fa-solid fa-list text-indigo-500 mr-2"></i> Incident Logs
+      </h3>
+      <div class="overflow-x-auto rounded border">
+        <table class="w-full text-left text-sm text-gray-600">
+          <thead class="bg-gray-100 uppercase tracking-widest text-xs font-semibold">
+            <tr>
+              <th class="px-4 py-3">Timestamp</th>
+              <th class="px-4 py-3">Event Type</th>
+              <th class="px-4 py-3">Peak Value</th>
+              <th class="px-4 py-3 text-center">SMS Status</th>
+            </tr>
+          </thead>
+          <tbody id="alertTableBody" class="divide-y divide-gray-200">
+            <tr><td colspan="4" class="px-4 py-8 text-center text-gray-500 italic"><i class="fa-solid fa-spinner fa-spin mr-2"></i> Loading recent events...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+
+  <script type="module" src="js/alerts.js"></script>
+</body>
+</html>

@@ -1,62 +1,125 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Smart Helmet - Emergency Contacts</title>
-  <link rel="stylesheet" href="css/contacts.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Emergency Contacts | Orbix Helmet</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    body { background-color: #f3f4f6; }
+    .glass-card {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      padding: 1.5rem;
+    }
+  </style>
 </head>
-<body>
-  <!-- Header -->
-  <header>
-    <h1>Smart Helmet</h1>
-    <nav>
-      <a href="dashboard.html">Dashboard</a>
-      <button onclick="logout()">Logout</button>
-    </nav>
+<body class="text-gray-800 font-sans antialiased flex flex-col min-h-screen">
+
+  <!-- Navbar -->
+  <header class="bg-indigo-700 shadow-md sticky top-0 z-50 text-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between h-16 items-center flex-wrap">
+        <div class="flex items-center space-x-3 w-full md:w-auto mb-2 md:mb-0">
+          <i class="fa-solid fa-motorcycle text-2xl"></i>
+          <span class="font-bold text-xl tracking-wide">Orbix Helmet</span>
+        </div>
+        <nav class="flex items-center space-x-1 md:space-x-3 text-sm font-medium overflow-x-auto w-full md:w-auto">
+          <a href="dashboard.html" class="hover:bg-indigo-600 px-3 py-2 rounded-md transition">Dashboard</a>
+          <a href="alerts.html" class="hover:bg-indigo-600 px-3 py-2 rounded-md transition">Alerts</a>
+          <a href="sensors.html" class="hover:bg-indigo-600 px-3 py-2 rounded-md transition">Sensors</a>
+          <a href="contacts.html" class="bg-indigo-800 px-3 py-2 rounded-md transition">Contacts</a>
+          <a href="system.html" class="hover:bg-indigo-600 px-3 py-2 rounded-md transition">System Info</a>
+          <button id="logoutBtn" class="bg-red-500 hover:bg-red-600 px-3 py-2 rounded-lg transition shadow flex items-center">
+            <i class="fa-solid fa-arrow-right-from-bracket mr-1"></i> Logout
+          </button>
+        </nav>
+      </div>
+    </div>
   </header>
 
-  <!-- Contacts Section -->
-  <section class="contacts">
-    <h2>Emergency Contacts</h2>
-
-    <!-- Add Contact Form -->
-    <form id="contactForm">
-      <input type="text" id="name" placeholder="Name" required>
-      <input type="text" id="phone" placeholder="Phone" required>
-      <input type="email" id="email" placeholder="Email">
-      <input type="text" id="relationship" placeholder="Relationship">
-      <button type="submit">Add Contact</button>
-    </form>
-
-    <!-- Contacts Table -->
-    <div class="table-container">
-      <table>
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Phone</th>
-            <th>Email</th>
-            <th>Relationship</th>
-            <th>Action</th>
-          </tr>
-        </thead>
-        <tbody id="contactsTableBody">
-          <!-- JS will populate rows here -->
-        </tbody>
-      </table>
+  <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
+    <div class="mb-8">
+      <h1 class="text-3xl font-bold text-gray-800"><i class="fa-solid fa-address-book text-indigo-500 mr-2"></i>Emergency Contacts</h1>
+      <p class="text-gray-600 mt-2">Manage the people who will be notified in case of an accident or emergency.</p>
     </div>
-  </section>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      
+      <!-- Add / Edit Contact Form -->
+      <div class="lg:col-span-1">
+        <div class="glass-card sticky top-24">
+          <h2 class="text-xl font-bold border-b pb-2 mb-4 text-gray-700" id="formTitle">Add New Contact</h2>
+          <form id="contactForm" class="space-y-4">
+            <input type="hidden" id="editId" value="">
+            
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Full Name <span class="text-red-500">*</span></label>
+              <div class="relative">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+                  <i class="fa-solid fa-user"></i>
+                </div>
+                <input type="text" id="name" required class="pl-10 w-full rounded border-gray-300 border bg-gray-50 px-3 py-2 focus:ring-indigo-500 focus:border-indigo-500" placeholder="John Doe">
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Phone Number <span class="text-red-500">*</span></label>
+              <div class="relative">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+                  <i class="fa-solid fa-phone"></i>
+                </div>
+                <input type="tel" id="phone" required class="pl-10 w-full rounded border-gray-300 border bg-gray-50 px-3 py-2 focus:ring-indigo-500 focus:border-indigo-500" placeholder="+1 234 567 8900">
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Priority</label>
+              <select id="priority" class="w-full rounded border-gray-300 border bg-gray-50 px-3 py-2 focus:ring-indigo-500 focus:border-indigo-500">
+                <option value="Standard">Standard</option>
+                <option value="High (SMS + Call)">High (Primary Alert)</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Relationship</label>
+              <input type="text" id="relationship" class="w-full rounded border-gray-300 border bg-gray-50 px-3 py-2 focus:ring-indigo-500 focus:border-indigo-500" placeholder="e.g. Spouse, Parent">
+            </div>
+
+            <div class="pt-2 flex gap-2">
+              <button type="submit" id="saveBtn" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded shadow transition">
+                <i class="fa-solid fa-plus mr-1"></i> Save Contact
+              </button>
+              <button type="button" id="cancelBtn" class="hidden bg-gray-400 hover:bg-gray-500 text-white font-medium py-2 px-4 rounded shadow transition">
+                Cancel
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Contacts List -->
+      <div class="lg:col-span-2">
+        <div class="glass-card">
+          <h2 class="text-xl font-bold border-b pb-2 mb-4 text-gray-700">Saved Contacts</h2>
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="contactsGrid">
+            <!-- Loading State -->
+            <div class="col-span-full py-8 text-center text-gray-500">
+              <i class="fa-solid fa-circle-notch fa-spin text-2xl mb-2"></i>
+              <p>Loading your emergency contacts...</p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </main>
 
   <!-- Scripts -->
   <script type="module" src="js/firebase.js"></script>
   <script type="module" src="js/contacts.js"></script>
-  <script type="module">
-    import { auth } from "./js/firebase.js";
-    window.logout = () => {
-      auth.signOut().then(() => {
-        window.location.href = "index.html";
-      });
-    };
-  </script>
 </body>
 </html>

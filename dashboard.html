@@ -3,98 +3,98 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Smart Helmet Dashboard</title>
-  <link rel="stylesheet" href="css/dashboard.css">
+  <title>Overview Dashboard | Orbix Helmet</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    body { background-color: #f3f4f6; }
+    .glass-card {
+      background: white; border-radius: 12px;
+      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+      padding: 1.5rem;
+    }
+  </style>
 </head>
-<body>
-  <header>
-    <h1>SMART HELMET DASHBOARD</h1>
-    <nav>
-      <a href="dashboard.html">Dashboard</a>
-      <a href="contacts.html">Contacts</a>
-      <button id="logoutBtn">Logout</button>
-    </nav>
+<body class="text-gray-800 font-sans antialiased flex flex-col min-h-screen">
+  <!-- Navbar -->
+  <header class="bg-indigo-700 shadow-md sticky top-0 z-50 text-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between h-16 items-center flex-wrap">
+        <div class="flex items-center space-x-3 w-full md:w-auto mb-2 md:mb-0">
+          <i class="fa-solid fa-motorcycle text-2xl"></i>
+          <span class="font-bold text-xl tracking-wide">Orbix Helmet</span>
+        </div>
+        <nav class="flex items-center space-x-1 md:space-x-3 text-sm font-medium overflow-x-auto w-full md:w-auto">
+          <a href="dashboard.html" class="bg-indigo-800 px-3 py-2 rounded-md transition">Dashboard</a>
+          <a href="alerts.html" class="hover:bg-indigo-600 px-3 py-2 rounded-md transition">Alerts</a>
+          <a href="sensors.html" class="hover:bg-indigo-600 px-3 py-2 rounded-md transition">Sensors</a>
+          <a href="contacts.html" class="hover:bg-indigo-600 px-3 py-2 rounded-md transition">Contacts</a>
+          <a href="system.html" class="hover:bg-indigo-600 px-3 py-2 rounded-md transition">System Info</a>
+          <button id="logoutBtn" class="bg-red-500 hover:bg-red-600 px-3 py-2 rounded-md transition shadow flex items-center">
+            <i class="fa-solid fa-arrow-right-from-bracket mr-1"></i> Logout
+          </button>
+        </nav>
+      </div>
+    </div>
   </header>
 
-  <main>
-    <!-- ALERT BOX -->
-    <div id="alertBox" style="margin: 15px 0;"></div>
-
-    <section class="cards">
-      <div class="card">
-        <h3>MPU6050 - X Axis</h3>
-        <iframe class="sensor-iframe"
-          src="https://thingspeak.com/channels/3309963/charts/3?bgcolor=%23ffffff&color=%23d62020&dynamic=true&results=30&title=MPU-X&type=line">
-        </iframe>
+  <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
+    <div class="mb-8">
+      <h1 class="text-3xl font-bold text-gray-800"><i class="fa-solid fa-gauge text-indigo-500 mr-2"></i>Helmet Overview</h1>
+      <p class="text-gray-600 mt-2">Real-time status snapshot of the helmet ecosystem.</p>
+    </div>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <!-- Rider Status -->
+      <div class="glass-card flex flex-col justify-center items-center border-t-4 border-green-500 py-10" id="cardRiderStatus">
+        <div class="w-20 h-20 rounded-full bg-green-100 flex items-center justify-center text-green-500 text-4xl mb-4" id="iconRiderStatus">
+          <i class="fa-solid fa-shield-halved"></i>
+        </div>
+        <h2 class="text-gray-500 font-semibold uppercase tracking-wider mb-2">Rider Status</h2>
+        <p class="text-4xl font-bold text-green-600" id="riderStatusText">Safe</p>
       </div>
 
-      <div class="card">
-        <h3>MPU6050 - Y Axis</h3>
-        <iframe class="sensor-iframe"
-          src="https://thingspeak.com/channels/3309963/charts/4?bgcolor=%23ffffff&color=%2300bfff&dynamic=true&results=30&title=MPU-Y&type=line">
-        </iframe>
-      </div>
+      <!-- General Grid -->
+      <div class="grid grid-cols-1 gap-4">
+        <!-- Helmet Connection -->
+        <div class="glass-card flex items-center justify-between border-l-4 border-blue-500 bg-white" id="cardConnStatus">
+          <div>
+            <p class="text-sm text-gray-400 font-semibold uppercase tracking-wider">Helmet Connection</p>
+            <h2 class="text-2xl font-bold text-blue-600 mt-1" id="connStatusText">Checking...</h2>
+          </div>
+          <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-500 text-xl">
+            <i class="fa-solid fa-wifi"></i>
+          </div>
+        </div>
 
-      <div class="card">
-        <h3>MPU6050 - Z Axis</h3>
-        <iframe class="sensor-iframe"
-          src="https://thingspeak.com/channels/3309963/charts/5?bgcolor=%23ffffff&color=%2300ff00&dynamic=true&results=30&title=MPU-Z&type=line">
-        </iframe>
-      </div>
+        <!-- Last Updated -->
+        <div class="glass-card flex items-center justify-between border-l-4 border-yellow-500 bg-white">
+          <div>
+            <p class="text-sm text-gray-400 font-semibold uppercase tracking-wider">Last Sync Timestamp</p>
+            <h2 class="text-xl font-bold text-gray-700 mt-1" id="lastUpdatedText">--:--:--</h2>
+          </div>
+          <div class="w-12 h-12 rounded-full bg-yellow-100 flex items-center justify-center text-yellow-500 text-xl">
+            <i class="fa-regular fa-clock"></i>
+          </div>
+        </div>
 
-      <div class="card">
-        <h3>Alcohol Sensor</h3>
-        <iframe class="sensor-iframe"
-          src="https://thingspeak.com/channels/3309963/charts/2?bgcolor=%23ffffff&color=%23ffa500&dynamic=true&results=30&title=Alcohol&type=line">
-        </iframe>
+        <!-- GPS Location -->
+        <div class="glass-card flex items-center justify-between border-l-4 border-purple-500 bg-white">
+          <div>
+            <p class="text-sm text-gray-400 font-semibold uppercase tracking-wider">GPS Location (Simulated)</p>
+            <h2 class="text-lg font-bold text-gray-700 mt-1" id="gpsCoords">28.6139° N, 77.2090° E</h2>
+            <a href="https://www.google.com/maps/search/?api=1&query=28.6139,77.2090" target="_blank" class="text-sm text-indigo-600 font-medium hover:underline mt-1 block">
+              <i class="fa-solid fa-location-dot mr-1"></i> Open in Maps
+            </a>
+          </div>
+          <div class="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center text-purple-500 text-xl">
+            <i class="fa-solid fa-map-location-dot"></i>
+          </div>
+        </div>
       </div>
-
-      <div class="card">
-        <h3>LDR Sensor</h3>
-        <iframe class="sensor-iframe"
-          src="https://thingspeak.com/channels/3309963/charts/1?bgcolor=%23ffffff&color=%23ffeb3b&dynamic=true&results=30&title=LDR&type=line">
-        </iframe>
-      </div>
-    </section>
-
-    <section class="alerts">
-      <h2>Alerts</h2>
-      <div class="table-container">
-        <table>
-          <thead>
-            <tr>
-              <th>Time</th>
-              <th>Type</th>
-              <th>Value</th>
-            </tr>
-          </thead>
-          <tbody id="alertTableBody">
-            <!-- JS will insert rows here -->
-          </tbody>
-        </table>
-      </div>
-    </section>
-
-    <section class="sessions">
-      <h2>Active Helmet Sessions</h2>
-      <div class="table-container">
-        <table>
-          <thead>
-            <tr>
-              <th>Start Time</th>
-              <th>End Time</th>
-              <th>Duration</th>
-            </tr>
-          </thead>
-          <tbody id="sessionTableBody">
-            <!-- JS will insert rows here -->
-          </tbody>
-        </table>
-      </div>
-    </section>
+    </div>
   </main>
 
-  <script type="module" src="js/firebase.js"></script>
   <script type="module" src="js/dashboard.js"></script>
 </body>
 </html>
