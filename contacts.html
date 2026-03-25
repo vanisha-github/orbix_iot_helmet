@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Smart Helmet - Emergency Contacts</title>
+  <link rel="stylesheet" href="css/contacts.css" />
+</head>
+<body>
+  <!-- Header -->
+  <header>
+    <h1>Smart Helmet</h1>
+    <nav>
+      <a href="dashboard.html">Dashboard</a>
+      <button onclick="logout()">Logout</button>
+    </nav>
+  </header>
+
+  <!-- Contacts Section -->
+  <section class="contacts">
+    <h2>Emergency Contacts</h2>
+
+    <!-- Add Contact Form -->
+    <form id="contactForm">
+      <input type="text" id="name" placeholder="Name" required>
+      <input type="text" id="phone" placeholder="Phone" required>
+      <input type="email" id="email" placeholder="Email">
+      <input type="text" id="relationship" placeholder="Relationship">
+      <button type="submit">Add Contact</button>
+    </form>
+
+    <!-- Contacts Table -->
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Phone</th>
+            <th>Email</th>
+            <th>Relationship</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="contactsTableBody">
+          <!-- JS will populate rows here -->
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Scripts -->
+  <script type="module" src="js/firebase.js"></script>
+  <script type="module" src="js/contacts.js"></script>
+  <script type="module">
+    import { auth } from "./js/firebase.js";
+    window.logout = () => {
+      auth.signOut().then(() => {
+        window.location.href = "index.html";
+      });
+    };
+  </script>
+</body>
+</html>

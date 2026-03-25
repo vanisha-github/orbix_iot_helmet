@@ -1,0 +1,234 @@
+/* =========================
+   Global Theme Styling
+========================= */
+
+
+
+body {
+  margin: 0;
+  font-family: 'Poppins', sans-serif;
+  background: linear-gradient(120deg, #ffe98a, #f7de86, #fff7c9);
+  color: #2c2c2c;
+  overflow-x: hidden;
+}
+
+/* Neon Glow Animation */
+@keyframes neonPulse {
+  0% { box-shadow: 0 0 5px #ffea00, 0 0 10px #ffea00; }
+  50% { box-shadow: 0 0 15px #ffea00, 0 0 30px #f6e600; }
+  100% { box-shadow: 0 0 5px #ffea00, 0 0 10px #ffea00; }
+}
+
+/* =========================
+   Header
+========================= */
+
+/* ---- Updated nav + logout button styling (match dashboard) ---- */
+/* ======== MATCHED HEADER BAR (same as dashboard) ======== */
+
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.2rem 2rem;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(14px);
+  border-bottom: 3px solid rgba(255, 230, 0, 0.9);
+  box-shadow: 0 0 15px rgba(255, 230, 0, 0.7);
+  position: sticky;
+  top: 0;
+  z-index: 20;
+}
+
+header h1 {
+  margin: 0;
+  font-size: 1.9rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: #2b2300;
+  text-shadow: 0 0 10px rgba(255, 238, 88, 0.9);
+}
+
+/* NAV LINKS + BUTTON STYLE SAME AS DASHBOARD */
+header nav {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+header nav a,
+header nav button {
+  background: rgba(130, 0, 255, 0.25);
+  padding: 0.55rem 1.1rem;
+  border-radius: 10px;
+  cursor: pointer;
+  text-decoration: none;
+  border: 2px solid rgba(149, 62, 255, 0.7);
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #3f007d;
+  backdrop-filter: blur(8px);
+  transition: 0.3s ease-in-out;
+  box-shadow: 0 0 10px rgba(149, 62, 255, 0.7);
+}
+
+/* Hover effect — glowing purple pulse */
+header nav a:hover,
+header nav button:hover {
+  transform: scale(1.12);
+  background: rgba(149, 62, 255, 0.55);
+  color: #fff;
+  box-shadow: 0 0 20px rgba(180, 93, 255, 1);
+}
+
+/* Click animation */
+header nav a:active,
+header nav button:active {
+  transform: scale(0.96);
+  box-shadow: 0 0 25px rgba(255, 223, 0, 1);
+  background: rgba(255, 223, 0, 0.4);
+}
+
+/* =========================
+   Contacts Section
+========================= */
+.contacts {
+  width: 85%;
+  margin: 2rem auto;
+  padding: 1.5rem;
+  background: rgba(255,255,255,0.35);
+  backdrop-filter: blur(15px);
+  border-radius: 16px;
+  border: 2px solid rgba(255,223,0,0.6);
+  box-shadow: 0 0 15px rgba(255,223,0,0.6);
+}
+
+.contacts h2 {
+  text-align: center;
+  margin-bottom: 1.5rem;
+  font-size: 1.6rem;
+  color: #321600;
+  text-shadow: 0 0 6px rgba(255, 229, 85, 0.9);
+}
+
+/* =========================
+   Add Contact Form
+========================= */
+#contactForm {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.9rem;
+  margin-bottom: 1.6rem;
+}
+
+#contactForm input {
+  padding: 0.7rem 1rem;
+  border-radius: 8px;
+  border: 2px solid #ffeb3b;
+  width: 220px;
+  background: rgba(255,255,255,0.7);
+  transition: 0.3s ease;
+}
+
+#contactForm input:focus {
+  border-color: #a870ff;
+  box-shadow: 0 0 8px #a870ff;
+}
+
+#contactForm button {
+  background: #7e3cff;
+  border: none;
+  padding: 0.7rem 1.2rem;
+  border-radius: 8px;
+  color: white;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+#contactForm button:hover {
+  transform: scale(1.05);
+  background: #9b5bff;
+  box-shadow: 0 0 8px #caa7ff;
+}
+
+/* =========================
+   Table Container (Scrollable)
+========================= */
+.table-container {
+  max-height: 260px;
+  overflow-y: auto;
+  margin: 0 auto;
+  width: 85%;
+  background: rgba(255,255,255,0.25);
+  backdrop-filter: blur(12px);
+  border: 2px solid rgba(255,223,0,0.7);
+  border-radius: 12px;
+  padding: 6px;
+  box-shadow: 0 0 12px rgba(255,223,0,0.6);
+}
+
+/* Scrollbar */
+.table-container::-webkit-scrollbar {
+  width: 6px;
+}
+.table-container::-webkit-scrollbar-thumb {
+  background: #7e3cff;
+  border-radius: 8px;
+}
+
+/* =========================
+   Table
+========================= */
+.table-container table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+thead th {
+  background: #ffdd41;
+  color: #2d1f00;
+  padding: 0.9rem;
+  position: sticky;
+  top: 0;
+  text-shadow: 0 0 6px rgba(255,229,85,0.8);
+}
+
+tbody tr {
+  transition: 0.3s ease;
+}
+
+tbody tr:hover {
+  background: rgba(255,230,120,0.4);
+  transform: scale(1.01);
+}
+
+tbody td {
+  padding: 0.8rem;
+  text-align: center;
+  border-bottom: 1px solid rgba(255,223,0,0.5);
+}
+
+/* Row Shading */
+tbody tr:nth-child(even) {
+  background: rgba(255,245,150,0.5);
+}
+
+/* =========================
+   Action Button in Table
+========================= */
+tbody button {
+  background: #c92bff;
+  color: white;
+  padding: 0.35rem 0.7rem;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+tbody button:hover {
+  background: #e16aff;
+  transform: scale(1.1);
+  box-shadow: 0 0 8px #e16aff;
+}

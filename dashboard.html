@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart Helmet Dashboard</title>
+  <link rel="stylesheet" href="css/dashboard.css">
+</head>
+<body>
+  <header>
+    <h1>SMART HELMET DASHBOARD</h1>
+    <nav>
+      <a href="dashboard.html">Dashboard</a>
+      <a href="contacts.html">Contacts</a>
+      <button id="logoutBtn">Logout</button>
+    </nav>
+  </header>
+
+  <main>
+    <!-- ALERT BOX -->
+    <div id="alertBox" style="margin: 15px 0;"></div>
+
+    <section class="cards">
+      <div class="card">
+        <h3>MPU6050 - X Axis</h3>
+        <iframe class="sensor-iframe"
+          src="https://thingspeak.com/channels/3309963/charts/3?bgcolor=%23ffffff&color=%23d62020&dynamic=true&results=30&title=MPU-X&type=line">
+        </iframe>
+      </div>
+
+      <div class="card">
+        <h3>MPU6050 - Y Axis</h3>
+        <iframe class="sensor-iframe"
+          src="https://thingspeak.com/channels/3309963/charts/4?bgcolor=%23ffffff&color=%2300bfff&dynamic=true&results=30&title=MPU-Y&type=line">
+        </iframe>
+      </div>
+
+      <div class="card">
+        <h3>MPU6050 - Z Axis</h3>
+        <iframe class="sensor-iframe"
+          src="https://thingspeak.com/channels/3309963/charts/5?bgcolor=%23ffffff&color=%2300ff00&dynamic=true&results=30&title=MPU-Z&type=line">
+        </iframe>
+      </div>
+
+      <div class="card">
+        <h3>Alcohol Sensor</h3>
+        <iframe class="sensor-iframe"
+          src="https://thingspeak.com/channels/3309963/charts/2?bgcolor=%23ffffff&color=%23ffa500&dynamic=true&results=30&title=Alcohol&type=line">
+        </iframe>
+      </div>
+
+      <div class="card">
+        <h3>LDR Sensor</h3>
+        <iframe class="sensor-iframe"
+          src="https://thingspeak.com/channels/3309963/charts/1?bgcolor=%23ffffff&color=%23ffeb3b&dynamic=true&results=30&title=LDR&type=line">
+        </iframe>
+      </div>
+    </section>
+
+    <section class="alerts">
+      <h2>Alerts</h2>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Time</th>
+              <th>Type</th>
+              <th>Value</th>
+            </tr>
+          </thead>
+          <tbody id="alertTableBody">
+            <!-- JS will insert rows here -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="sessions">
+      <h2>Active Helmet Sessions</h2>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Start Time</th>
+              <th>End Time</th>
+              <th>Duration</th>
+            </tr>
+          </thead>
+          <tbody id="sessionTableBody">
+            <!-- JS will insert rows here -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <script type="module" src="js/firebase.js"></script>
+  <script type="module" src="js/dashboard.js"></script>
+</body>
+</html>

@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart Helmet Login</title>
+  <link rel="stylesheet" href="css/index.css" />
+</head>
+
+<body>
+  <div class="login-container">
+    <h2>Smart Helmet Login</h2>
+
+    <input id="email" type="email" placeholder="Email" required /><br><br>
+    <input id="password" type="password" placeholder="Password" required /><br><br>
+
+    <button onclick="loginUser()">Login</button>
+    <button onclick="signupUser()">Signup</button>
+  </div>
+
+  <script type="module" src="js/firebase.js"></script>
+  <script type="module" src="js/auth.js"></script>
+</body>
+</html>
