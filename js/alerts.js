@@ -25,46 +25,102 @@ function initCharts() {
   };
 
   chartAlc = new Chart(document.getElementById("chartAlcData").getContext("2d"), {
-    type: "line", data: { labels: [], datasets: [{ data: [], borderColor: "#f97316", tension: 0.2, backgroundColor: "rgba(249, 115, 22, 0.1)", fill: true }] },
+    type: "line",
+    data: { labels: [], datasets: [{ data: [], borderColor: "#f97316", tension: 0.2, backgroundColor: "rgba(249, 115, 22, 0.1)", fill: true, pointRadius: 4, pointBackgroundColor: [] }] },
     options: { ...commonOptions, plugins: { title: { display: true, text: "Alcohol Sensor History" } } }
   });
 
   chartAcc = new Chart(document.getElementById("chartAccData").getContext("2d"), {
-    type: "line", data: { labels: [], datasets: [{ data: [], borderColor: "#ef4444", tension: 0.2, backgroundColor: "rgba(239, 68, 68, 0.1)", fill: true }] },
+    type: "line",
+    data: { labels: [], datasets: [{ data: [], borderColor: "#ef4444", tension: 0.2, backgroundColor: "rgba(239, 68, 68, 0.1)", fill: true, pointRadius: 4, pointBackgroundColor: [] }] },
     options: { ...commonOptions, plugins: { title: { display: true, text: "G-Force / Acceleration (MPU6050)" } } }
   });
 
   chartLdr = new Chart(document.getElementById("chartLdrData").getContext("2d"), {
-    type: "line", data: { labels: [], datasets: [{ data: [], borderColor: "#eab308", tension: 0.2, backgroundColor: "rgba(234, 179, 8, 0.1)", fill: true }] },
+    type: "line",
+    data: { labels: [], datasets: [{ data: [], borderColor: "#eab308", tension: 0.2, backgroundColor: "rgba(234, 179, 8, 0.1)", fill: true, pointRadius: 4, pointBackgroundColor: [] }] },
     options: { ...commonOptions, plugins: { title: { display: true, text: "Ambient Light (LDR)" } } }
+  });
+}
+
+function computeSessions(feeds) {
+  const sessions = [];
+  let sessionStart = null;
+  let prevTime = null;
+  const MAX_GAP = 5 * 60 * 1000; // 5 min
+
+  feeds.forEach(feed => {
+    if (!feed.created_at) return;
+    const current = new Date(feed.created_at);
+    if (!sessionStart) {
+      sessionStart = current;
+      prevTime = current;
+      return;
+    }
+    if (current - prevTime > MAX_GAP) {
+      sessions.push({ start: sessionStart, end: prevTime });
+      sessionStart = current;
+    }
+    prevTime = current;
+  });
+
+  if (sessionStart && prevTime) sessions.push({ start: sessionStart, end: prevTime });
+  return sessions;
+}
+
+function renderSessions(sessions) {
+  const table = document.getElementById("sessionTableBody");
+  table.innerHTML = "";
+  if (!sessions.length) {
+    table.innerHTML = `<tr><td colspan="3" class="px-4 py-8 text-center text-gray-500 italic">No session data found.</td></tr>`;
+    return;
+  }
+
+  sessions.forEach(sess => {
+    const durationMin = Math.floor((sess.end - sess.start)/60000);
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td class="px-4 py-3">${sess.start.toLocaleString()}</td>
+      <td class="px-4 py-3">${sess.end.toLocaleString()}</td>
+      <td class="px-4 py-3">${durationMin} min</td>
+    `;
+    table.appendChild(tr);
   });
 }
 
 // ---------- FETCH ALERTS & DATA ----------
 async function fetchAlerts() {
   try {
-    const res = await fetch(`https://api.thingspeak.com/channels/${TS_CHANNEL}/feeds.json?api_key=${TS_API_KEY}&results=40`);
+    const res = await fetch(`https://api.thingspeak.com/channels/${TS_CHANNEL}/feeds.json?api_key=${TS_API_KEY}&results=80`);
+    if (!res.ok) throw new Error(`HTTP error ${res.status}`);
     const data = await res.json();
-    
+
+    const feeds = data.feeds || [];
+    const nowTxt = feeds.length ? new Date(feeds[feeds.length-1].created_at).toLocaleString("en-IN", { timeZone: "Asia/Kolkata" }) : "--";
+    document.getElementById("alertsLastSync").innerText = nowTxt;
+
     let totalAlerts = 0;
     const body = document.getElementById("alertTableBody");
     body.innerHTML = "";
-    
+
     const timeLabels = [], dpAlc = [], dpAcc = [], dpLdr = [];
-    
-    data.feeds.forEach(feed => {
+    const colorsAlc = [], colorsAcc = [], colorsLdr = [];
+
+    feeds.forEach(feed => {
       const time = new Date(feed.created_at).toLocaleString("en-IN", { timeZone: "Asia/Kolkata" });
-      const alc = Number(feed.field2 || 0);
-      const ldr = Number(feed.field1 || 0);
+      const alc = Number(feed.field2 || 0); const ldr = Number(feed.field1 || 0);
       const ax = Number(feed.field3 || 0), ay = Number(feed.field4 || 0), az = Number(feed.field5 || 0);
       const acc = Math.sqrt(ax*ax + ay*ay + az*az);
-      
+
       timeLabels.push(time); dpAlc.push(alc); dpAcc.push(acc.toFixed(0)); dpLdr.push(ldr);
+      colorsAlc.push(alc > ALCOHOL_LIMIT ? "#ff0000" : "#f97316");
+      colorsAcc.push(acc > ACCIDENT_LIMIT ? "#ff0000" : "#ef4444");
+      colorsLdr.push(ldr > 700 ? "#6b21a8" : "#eab308");
 
       if (alc > ALCOHOL_LIMIT || acc > ACCIDENT_LIMIT) {
         totalAlerts++;
         let type = "", val = "", stat = "";
-        if (alc > ALCOHOL_LIMIT && acc > ACCIDENT_LIMIT) { type = "🚨 Both"; val = `A:${alc}, G:${acc.toFixed()}`; stat = "Pending"; }
+        if (alc > ALCOHOL_LIMIT && acc > ACCIDENT_LIMIT) { type = "⚠️ Both"; val = `A:${alc}, G:${acc.toFixed()}`; stat = "Pending"; }
         else if (alc > ALCOHOL_LIMIT) { type = "🍺 Alcohol"; val = `Lvl: ${alc}`; stat = "Sent"; }
         else { type = "💥 Impact"; val = `Force: ${acc.toFixed()}`; stat = "Pending"; }
 
@@ -76,18 +132,27 @@ async function fetchAlerts() {
           <td class="px-4 py-3 text-gray-800 font-medium">${val}</td>
           <td class="px-4 py-3 text-center"><span class="${stat==='Sent'?'bg-green-100 text-green-700':'bg-yellow-100 text-yellow-700'} px-2 py-1 rounded text-xs font-bold uppercase">${stat}</span></td>
         `;
-        body.prepend(tr); // Newer top
+        body.prepend(tr);
       }
     });
 
-    if (totalAlerts === 0) body.innerHTML = `<tr><td colspan="4" class="px-4 py-8 text-center text-gray-500 italic">No alerts recorded.</td></tr>`;
+    if (totalAlerts === 0) {
+      body.innerHTML = `<tr><td colspan="4" class="px-4 py-8 text-center text-gray-500 italic">No alerts recorded.</td></tr>`;
+    }
+
     document.getElementById("totalAlertsText").innerText = totalAlerts;
 
-    chartAlc.data.labels = timeLabels; chartAlc.data.datasets[0].data = dpAlc; chartAlc.update();
-    chartAcc.data.labels = timeLabels; chartAcc.data.datasets[0].data = dpAcc; chartAcc.update();
-    chartLdr.data.labels = timeLabels; chartLdr.data.datasets[0].data = dpLdr; chartLdr.update();
+    chartAlc.data.labels = timeLabels; chartAlc.data.datasets[0].data = dpAlc; chartAlc.data.datasets[0].pointBackgroundColor = colorsAlc; chartAlc.update();
+    chartAcc.data.labels = timeLabels; chartAcc.data.datasets[0].data = dpAcc; chartAcc.data.datasets[0].pointBackgroundColor = colorsAcc; chartAcc.update();
+    chartLdr.data.labels = timeLabels; chartLdr.data.datasets[0].data = dpLdr; chartLdr.data.datasets[0].pointBackgroundColor = colorsLdr; chartLdr.update();
 
-  } catch (e) { console.error("Error fetching logs", e); }
+    const sessions = computeSessions(feeds);
+    renderSessions(sessions);
+
+  } catch (e) {
+    console.error("Error fetching logs", e);
+    document.getElementById("alertsLastSync").innerText = "Offline";
+  }
 }
 
 initCharts();

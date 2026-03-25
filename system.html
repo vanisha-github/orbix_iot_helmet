@@ -1,14 +1,16 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>System Info | Orbix Helmet</title>
+  <title>Rider Info | Orbix Helmet</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
     body { background-color: #f3f4f6; }
     .glass-card { background: white; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); padding: 1.5rem; }
+    canvas { width: 100% !important; height: 100% !important; }
   </style>
 </head>
 <body class="text-gray-800 font-sans antialiased flex flex-col min-h-screen">
@@ -25,7 +27,7 @@
           <a href="alerts.html" class="hover:bg-indigo-600 px-3 py-2 rounded-md transition">Alerts</a>
           <a href="sensors.html" class="hover:bg-indigo-600 px-3 py-2 rounded-md transition">Sensors</a>
           <a href="contacts.html" class="hover:bg-indigo-600 px-3 py-2 rounded-md transition">Contacts</a>
-          <a href="system.html" class="bg-indigo-800 px-3 py-2 rounded-md transition">System Info</a>
+          <a href="system.html" class="bg-indigo-800 px-3 py-2 rounded-md transition">Rider Info</a>
           <button id="logoutBtn" class="bg-red-500 hover:bg-red-600 px-3 py-2 rounded-lg transition shadow">
             <i class="fa-solid fa-arrow-right-from-bracket mr-1"></i> Logout
           </button>
@@ -34,71 +36,126 @@
     </div>
   </header>
 
-  <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full max-w-4xl">
-    <div class="mb-8">
-      <h1 class="text-3xl font-bold text-gray-800"><i class="fa-solid fa-server text-indigo-500 mr-2"></i>System & Device Info</h1>
-      <p class="text-gray-600 mt-2">Technical specifications and account mapping for your Orbix Device.</p>
+  <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full max-w-5xl">
+    <div class="mb-8 flex justify-between items-end border-b pb-4">
+      <div>
+        <h1 class="text-3xl font-bold text-gray-800"><i class="fa-solid fa-id-card text-indigo-500 mr-2"></i>Rider Information</h1>
+        <p class="text-gray-600 mt-2">Manage personal details, vehicle info, and view usage statistics.</p>
+      </div>
+      <button id="saveRiderBtn" class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded shadow font-bold transition">
+        <i class="fa-solid fa-floppy-disk mr-1"></i> Save Changes
+      </button>
     </div>
 
-    <div class="glass-card mb-6 border-t-4 border-indigo-500">
-      <div class="flex items-center justify-between mb-4 border-b pb-4">
-        <div>
-          <h2 class="text-xl font-bold text-gray-800">Hardware Profile</h2>
-          <p class="text-sm text-gray-500">Identifies the physical node transmitting data.</p>
-        </div>
-        <i class="fa-solid fa-helmet-safety text-4xl text-gray-300"></i>
-      </div>
-      
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-8">
-        <div>
-          <label class="text-xs font-semibold text-gray-400 uppercase">Device ID</label>
-          <p class="text-lg font-medium text-gray-900 border bg-gray-50 rounded px-3 py-2 mt-1 font-mono">HELMET_ORB_992</p>
-        </div>
-        <div>
-          <label class="text-xs font-semibold text-gray-400 uppercase">MAC Address / MAC-ID</label>
-          <p class="text-lg font-medium text-gray-900 border bg-gray-50 rounded px-3 py-2 mt-1 font-mono">00:1B:44:11:3A:B7</p>
-        </div>
-        <div>
-          <label class="text-xs font-semibold text-gray-400 uppercase">Firmware Ver</label>
-          <p class="text-base font-medium text-gray-800 mt-1">v2.1.0-stable</p>
-        </div>
-        <div>
-          <label class="text-xs font-semibold text-gray-400 uppercase">Last Boot Time</label>
-          <p class="text-base font-medium text-gray-800 mt-1" id="bootTime">Loading...</p>
-        </div>
-      </div>
-    </div>
+    <!-- Alert Box -->
+    <div id="statusAlert" class="hidden mb-6 px-4 py-3 rounded border text-sm font-semibold"></div>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
       
-      <div class="glass-card">
-        <h3 class="text-lg font-bold border-b pb-2 mb-4 text-gray-700"><i class="fa-solid fa-user-astronaut mr-2"></i>Rider Profile</h3>
-        <ul class="space-y-4">
-          <li>
-            <label class="text-xs font-semibold text-gray-400 uppercase">Account</label>
-            <p class="text-md font-medium text-indigo-700" id="riderName">Authenticating...</p>
-          </li>
-          <li>
-            <label class="text-xs font-semibold text-gray-400 uppercase">Account UID</label>
-            <p class="text-sm font-mono text-gray-600 truncate" id="riderUid">--</p>
-          </li>
-        </ul>
-      </div>
-
-      <div class="glass-card">
-        <h3 class="text-lg font-bold border-b pb-2 mb-4 text-gray-700"><i class="fa-solid fa-stopwatch mr-2"></i>Telemetry Uptime</h3>
-        <div class="flex items-center gap-4">
-          <div class="w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center border-4 border-blue-500">
-            <i class="fa-solid fa-bolt text-2xl text-blue-600"></i>
+      <!-- 1. Basic Information -->
+      <div class="glass-card flex flex-col gap-4">
+        <h2 class="text-xl font-bold text-gray-700 border-b pb-2 mb-2"><i class="fa-solid fa-user text-indigo-400 mr-2"></i>1. Basic Information</h2>
+        
+        <div>
+          <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Rider Name *</label>
+          <input type="text" id="riderName" class="w-full border rounded px-3 py-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none" placeholder="Enter Full Name">
+        </div>
+        
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Age (Optional)</label>
+            <input type="number" id="riderAge" class="w-full border rounded px-3 py-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none" placeholder="Age">
           </div>
           <div>
-            <p class="text-3xl font-bold text-gray-800" id="sysUptime">0h 0m</p>
-            <p class="text-sm text-gray-500 font-medium">Session Active Time</p>
+            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Phone Number *</label>
+            <input type="tel" id="riderPhone" class="w-full border rounded px-3 py-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none" placeholder="+91 9999999999">
           </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Email (Optional)</label>
+          <input type="email" id="riderEmail" class="w-full border rounded px-3 py-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none" placeholder="user@example.com">
         </div>
       </div>
 
+      <!-- 2. Identification & Emergency Details -->
+      <div class="flex flex-col gap-8">
+        
+        <!-- Identification Details -->
+        <div class="glass-card flex flex-col gap-4">
+          <h2 class="text-xl font-bold text-gray-700 border-b pb-2 mb-2"><i class="fa-solid fa-barcode text-indigo-400 mr-2"></i>2. Identification Details</h2>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Helmet ID / Device ID</label>
+              <input type="text" id="deviceId" class="w-full border rounded px-3 py-2 bg-gray-100 font-mono text-sm outline-none" value="HELMET_ORB_992" readonly>
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Vehicle Number</label>
+              <input type="text" id="vehicleNum" class="w-full border rounded px-3 py-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none uppercase" placeholder="e.g. DL 1C AA 1111">
+            </div>
+          </div>
+        </div>
+
+        <!-- Emergency Details -->
+        <div class="glass-card flex flex-col gap-4 border-l-4 border-red-500">
+          <h2 class="text-xl font-bold text-gray-700 border-b pb-2 mb-2 text-red-600"><i class="fa-solid fa-truck-medical text-red-400 mr-2"></i>3. Emergency Details</h2>
+          
+          <div>
+            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Blood Group</label>
+            <select id="bloodGroup" class="w-full border rounded px-3 py-2 focus:ring-red-500 focus:border-red-500 outline-none bg-white">
+              <option value="">Select Blood Group</option>
+              <option value="A+">A+</option>
+              <option value="A-">A-</option>
+              <option value="B+">B+</option>
+              <option value="B-">B-</option>
+              <option value="O+">O+</option>
+              <option value="O-">O-</option>
+              <option value="AB+">AB+</option>
+              <option value="AB-">AB-</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-gray-500 uppercase mb-1 flex justify-between">
+              <span>Primary Emergency Contact</span>
+              <a href="contacts.html" class="text-indigo-500 hover:underline"><i class="fa-solid fa-arrow-up-right-from-square"></i> Edit Contacts</a>
+            </label>
+            <div class="bg-gray-50 border rounded px-4 py-3 flex items-center gap-3">
+              <div class="w-10 h-10 rounded-full bg-red-100 flex justify-center items-center text-red-500">
+                <i class="fa-solid fa-phone"></i>
+              </div>
+              <div>
+                <p id="primaryContactName" class="font-bold text-gray-700">Loading...</p>
+                <p id="primaryContactPhone" class="text-sm font-medium text-gray-500">Please wait</p>
+              </div>
+            </div>
+            <p class="text-xs text-gray-400 mt-2 italic">* Automatically fetched from your highest priority emergency contact.</p>
+          </div>
+        </div>
+
+      </div>
     </div>
+
+    <!-- 4. Total Usage Time -->
+    <div class="glass-card">
+      <h2 class="text-xl font-bold text-gray-700 border-b pb-2 mb-4"><i class="fa-solid fa-calendar-week text-indigo-400 mr-2"></i>4. Total Usage Time</h2>
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-6 items-center">
+        <div class="col-span-1 text-center md:text-left flex flex-col md:block">
+          <div class="mb-4">
+            <p class="text-sm font-bold text-gray-500 uppercase tracking-widest">This Week</p>
+            <p class="text-4xl font-bold text-indigo-600 mt-1">14<span class="text-lg text-gray-500 font-medium">h</span> 35<span class="text-lg text-gray-500 font-medium">m</span></p>
+          </div>
+          <div>
+            <p class="text-sm font-bold text-gray-500 uppercase tracking-widest">Today</p>
+            <p class="text-2xl font-bold text-gray-700 mt-1">2<span class="text-sm text-gray-500 font-medium">h</span> 10<span class="text-sm text-gray-500 font-medium">m</span></p>
+          </div>
+        </div>
+        <div class="col-span-1 md:col-span-3 h-72 w-full bg-white rounded-xl border border-gray-200 shadow-inner p-4 transition duration-300 hover:shadow-lg relative overflow-hidden" style="min-height: 250px;">
+          <canvas id="weeklyUsageChart"></canvas>
+        </div>
+      </div>
+    </div>
+
   </main>
 
   <script type="module" src="js/system.js"></script>

@@ -36,40 +36,46 @@ async function updateOverview() {
     const az = Number(latest.field5 || 0);
     const acc = Math.sqrt(ax * ax + ay * ay + az * az);
     
-    const rsCard = document.getElementById("cardRiderStatus");
-    const rsText = document.getElementById("riderStatusText");
-    const rsIcon = document.getElementById("iconRiderStatus");
+    // Map Update (Simulated for this demo, usually comes from field values)
+    const lat = 28.6139; // Replace with actual ThingSpeak field if GPS is available
+    const lng = 77.2090;
     
-    if (acc > ACCIDENT_LIMIT) {
-      rsCard.className = "glass-card flex flex-col justify-center items-center border-t-8 border-red-500 py-10 animate-pulse";
-      rsText.className = "text-4xl font-bold text-red-600";
-      rsText.innerText = "Accident Detected";
-      rsIcon.className = "w-20 h-20 rounded-full bg-red-100 flex items-center justify-center text-red-500 text-4xl mb-4";
-      rsIcon.innerHTML = `<i class="fa-solid fa-car-burst"></i>`;
-    } else if (alcVal > ALCOHOL_LIMIT) {
-      rsCard.className = "glass-card flex flex-col justify-center items-center border-t-8 border-orange-500 py-10";
-      rsText.className = "text-4xl font-bold text-orange-600";
-      rsText.innerText = "DUI Detected";
-      rsIcon.className = "w-20 h-20 rounded-full bg-orange-100 flex items-center justify-center text-orange-500 text-4xl mb-4";
-      rsIcon.innerHTML = `<i class="fa-solid fa-beer-mug-empty"></i>`;
-    } else {
-      rsCard.className = "glass-card flex flex-col justify-center items-center border-t-8 border-green-500 py-10";
-      rsText.className = "text-4xl font-bold text-green-600";
-      rsText.innerText = "Safe";
-      rsIcon.className = "w-20 h-20 rounded-full bg-green-100 flex items-center justify-center text-green-500 text-4xl mb-4";
-      rsIcon.innerHTML = `<i class="fa-solid fa-shield-halved"></i>`;
+    // Update Map iframe source dynamically
+    const mapIframe = document.getElementById("gpsMapIframe");
+    const newSrc = `https://maps.google.com/maps?q=${lat},${lng}&hl=en&z=14&output=embed`;
+    if (mapIframe && mapIframe.src !== newSrc) {
+      mapIframe.src = newSrc;
     }
+    const coordsText = document.getElementById("gpsCoords");
+    if (coordsText) coordsText.innerText = `${lat}° N, ${lng}° E`;
 
     // Connection & Time
-    document.getElementById("connStatusText").innerText = "Online";
-    document.getElementById("cardConnStatus").classList.replace("border-gray-500", "border-blue-500");
-    const syncTime = new Date(latest.created_at).toLocaleString("en-IN", { timeZone: "Asia/Kolkata" });
-    document.getElementById("lastUpdatedText").innerText = syncTime;
+    const syncDate = new Date(latest.created_at);
+    const syncTimeText = syncDate.toLocaleString("en-IN", { timeZone: "Asia/Kolkata" });
+    document.getElementById("lastUpdatedText").innerText = syncTimeText;
+
+    // Check online status based on time difference (e.g., > 2 minutes = Offline)
+    const now = new Date();
+    const diffMs = now - syncDate;
+    
+    if (diffMs > 2 * 60 * 1000) {
+      document.getElementById("connStatusText").innerText = "Offline";
+      document.getElementById("connStatusText").className = "text-2xl font-bold text-gray-500 mt-1";
+      document.getElementById("cardConnStatus").classList.remove("border-blue-500");
+      document.getElementById("cardConnStatus").classList.add("border-gray-500");
+    } else {
+      document.getElementById("connStatusText").innerText = "Online";
+      document.getElementById("connStatusText").className = "text-2xl font-bold text-blue-600 mt-1";
+      document.getElementById("cardConnStatus").classList.remove("border-gray-500");
+      document.getElementById("cardConnStatus").classList.add("border-blue-500");
+    }
 
   } catch (err) {
     console.error("Error fetching overview:", err);
     document.getElementById("connStatusText").innerText = "Offline";
-    document.getElementById("cardConnStatus").classList.replace("border-blue-500", "border-gray-500");
+    document.getElementById("connStatusText").className = "text-2xl font-bold text-gray-500 mt-1";
+    document.getElementById("cardConnStatus").classList.remove("border-blue-500");
+    document.getElementById("cardConnStatus").classList.add("border-gray-500");
   }
 }
 
